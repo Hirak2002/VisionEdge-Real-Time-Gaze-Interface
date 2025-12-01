@@ -1,6 +1,12 @@
 /*
- * On-Device Gaze Tracking for Accessibility
- * C++ Inference Engine using OpenCV and ONNX Runtime
+ * VisionEdge: Real-Time Gaze Interface
+ * C++ Implementation with ONNX Runtime
+ * 
+ * Author: Hirak with AI assistance
+ * Date: December 2025
+ * 
+ * This is the C++ version for production deployment.
+ * For quick testing, use the Python version instead.
  */
 
 #include <opencv2/opencv.hpp>
@@ -10,20 +16,25 @@
 #include <vector>
 #include <array>
 
+// Main class for gaze tracking functionality
 class GazeTracker {
 private:
+    // ONNX Runtime components
     Ort::Env env;
     Ort::Session session;
     Ort::SessionOptions session_options;
     Ort::AllocatorWithDefaultOptions allocator;
     
+    // Model I/O
     std::vector<const char*> input_names;
     std::vector<const char*> output_names;
     std::vector<int64_t> input_shape;
     
+    // OpenCV components
     cv::VideoCapture cap;
     cv::CascadeClassifier eye_cascade;
     
+    // Screen dimensions
     int screen_width;
     int screen_height;
     
@@ -118,7 +129,7 @@ public:
             input_tensor_values.data(),
             input_tensor_values.size(),
             tensor_shape.data(),
-            tensor_shape.size()
+            tensor_shape.size()   
         );
         
         // Run inference

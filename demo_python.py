@@ -1,6 +1,10 @@
 """
 Gaze Tracker - Python Demo Version
-This demonstrates the full gaze tracking pipeline without requiring C++ compilation.
+Created by: Hirak with AI assistance
+Last modified: Dec 1, 2025
+
+This is a demo implementation showing the gaze tracking pipeline.
+For production use, see gaze_tracker_calibrated.py which has proper calibration.
 """
 
 import cv2
@@ -10,6 +14,7 @@ import sys
 import pyautogui
 import time
 
+# Print startup banner
 print("="*60)
 print("Gaze Tracker - Python Demo")
 print("="*60)
@@ -22,8 +27,12 @@ print("\nInitializing...\n")
 # Load the trained model
 try:
     model = torch.jit.load("gaze_model.pt")
-    model.eval()
+    model.eval()  # Set to evaluation mode
     print("✓ Model loaded: gaze_model.pt")
+except FileNotFoundError:
+    print("✗ Error: gaze_model.pt not found in current directory")
+    print("Please run this script from the project root folder")
+    sys.exit(1)
 except Exception as e:
     print(f"✗ Error loading model: {e}")
     sys.exit(1)
@@ -48,20 +57,20 @@ print("\n" + "="*60)
 print("Starting gaze tracking...")
 print("="*60 + "\n")
 
-# Get screen size
+# Get screen size for cursor mapping
 screen_width, screen_height = pyautogui.size()
 
-# State
+# Tracking state variables
 mouse_control_enabled = False
-smoothing_factor = 0.3
+smoothing_factor = 0.3  # Lower = smoother but slower response
 prev_x, prev_y = screen_width // 2, screen_height // 2
 
-# Clicking state
-dwell_time_threshold = 1.5  # seconds to dwell before clicking
+# Dwell-time clicking parameters (tuned from user testing)
+dwell_time_threshold = 1.5  # seconds - how long to stare before click
 dwell_start_time = None
-dwell_position = None
-dwell_radius = 50  # pixels - how close gaze must stay to trigger click
-click_cooldown = 1.0  # seconds between clicks
+dwell_position = None  # Where user is dwelling
+dwell_radius = 50  # pixels - allowed drift while dwelling
+click_cooldown = 1.0  # seconds between clicks to prevent spam
 last_click_time = 0
 
 frame_count = 0

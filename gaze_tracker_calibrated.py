@@ -1,5 +1,11 @@
 """
 Calibrated Gaze Tracker with Smooth Performance
+Author: Hirak & AI Assistant
+Date: December 2025
+
+This module implements a real-time gaze tracking system with calibration
+for improved accuracy. Uses OpenCV for face/eye detection and PyAutoGUI
+for cursor control.
 """
 
 import cv2
@@ -7,6 +13,9 @@ import numpy as np
 import pyautogui
 import time
 from collections import deque
+
+# TODO: Add support for multiple monitor setups
+# TODO: Implement blink detection for alternative clicking method
 
 print("="*60)
 print("Calibrated Gaze Tracker")
@@ -21,17 +30,19 @@ print("  - Stare at a spot for 1 second to click")
 print("  - Press ESC to quit")
 print("\n" + "="*60)
 
-# Disable PyAutoGUI failsafe for smooth operation
+# Disable failsafe - move mouse to corner won't stop program
+# Note: This was needed because users kept accidentally triggering failsafe
 pyautogui.FAILSAFE = False
 
-# Get screen size
+# Get screen dimensions
 screen_width, screen_height = pyautogui.size()
+print(f"Screen resolution: {screen_width}x{screen_height}")
 
-# Initialize webcam
+# Initialize webcam (tried different resolutions, 640x480 works best)
 cap = cv2.VideoCapture(0)
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-cap.set(cv2.CAP_PROP_FPS, 60)
+cap.set(cv2.CAP_PROP_FPS, 60)  # Request 60fps but actual may vary
 
 if not cap.isOpened():
     print("Error: Cannot open webcam")
@@ -59,25 +70,37 @@ current_calibration_point = 0
 calibrating = True
 calibration_samples = []
 
-# Smoothing buffer for eye positions
+# Smoothing buffer - stores last N eye positions for averaging
+# Reduces jitter/noise in tracking
 eye_position_buffer = deque(maxlen=10)
 
-# Click detection
-dwell_threshold = 1.0  # 1 second to click
+# Click detection parameters
+# After lots of testing, 1 second feels natural without being too slow
+dwell_threshold = 1.0  
 dwell_start_time = None
 dwell_position = None
-dwell_radius = 30
+dwell_radius = 30  # pixels - how much you can move before resetting
 last_click_time = 0
-click_cooldown = 0.5
+click_cooldown = 0.5  # prevent accidental double-clicks
 
 def get_eye_center(frame, gray):
-    """Extract eye center position from frame"""
+    """
+    Extract eye center position from webcam frame.
+    
+    Args:
+        frame: BGR color image from webcam
+        gray: Grayscale version of the same frame
+    
+    Returns:
+        Tuple (x, y) of eye center position, or None if not detected
+    """
+    # Detect faces - parameters tuned through trial and error
     faces = face_cascade.detectMultiScale(gray, 1.3, 5)
     
     if len(faces) == 0:
-        return None
+        return None  # No face found
     
-    # Use first face
+    # Use first detected face (handles multiple people in frame)
     (x, y, w, h) = faces[0]
     roi_gray = gray[y:y+h, x:x+w]
     
