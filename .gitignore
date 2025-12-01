@@ -1,0 +1,46 @@
+# Build directories
+build/
+bin/
+out/
+Release/
+Debug/
+x64/
+x86/
+
+# Visual Studio
+.vs/
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+
+# Model files (large)
+*.pth
+*.pt
+
+# Keep ONNX model (small enough)
+# *.onnx
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+*.log
